@@ -1,7 +1,7 @@
--- Практическое задание №3.
+-- РџСЂР°РєС‚РёС‡РµСЃРєРѕРµ Р·Р°РґР°РЅРёРµ в„–3.
 
-/* Задание №1.
-	Проанализировать созданную БД vk */
+/* Р—Р°РґР°РЅРёРµ в„–1.
+	РџСЂРѕР°РЅР°Р»РёР·РёСЂРѕРІР°С‚СЊ СЃРѕР·РґР°РЅРЅСѓСЋ Р‘Р” vk */
 DROP DATABASE IF EXISTS vk;
 
 CREATE DATABASE vk;
@@ -12,7 +12,7 @@ SHOW tables;
 
 CREATE TABLE users (
  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
- first_name VARCHAR(145) NOT NULL, -- COMMENT 'Имя',
+ first_name VARCHAR(145) NOT NULL, -- COMMENT 'РРјСЏ',
  last_name VARCHAR(145) NOT NULL,
  email VARCHAR(145) NOT NULL,
  phone INT UNSIGNED NOT NULL,
@@ -36,7 +36,7 @@ ALTER TABLE users DROP COLUMN passport;
 
 SELECT * FROM users;
 
-DESCRIBE users; -- описание таблицы
+DESCRIBE users; -- РѕРїРёСЃР°РЅРёРµ С‚Р°Р±Р»РёС†С‹
 
 
 CREATE TABLE profiles (
@@ -60,7 +60,7 @@ CREATE TABLE messages (
  txt TEXT NOT NULL,
  is_delivered BOOLEAN DEFAULT FALSE,
  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
- updated_at DATETIME DEFAULT CURRENT_TIMESTAMP, -- ON UPDATE CURRENT_TIMESTAMP COMMENT 'Время обновления строки'
+ updated_at DATETIME DEFAULT CURRENT_TIMESTAMP, -- ON UPDATE CURRENT_TIMESTAMP COMMENT 'Р’СЂРµРјСЏ РѕР±РЅРѕРІР»РµРЅРёСЏ СЃС‚СЂРѕРєРё'
  INDEX fk_messages_from_user_idx (from_user_id),
  INDEX fk_messages_to_user_idx (to_user_id),
  CONSTRAINT fk_messages_users_1 FOREIGN KEY (from_user_id) REFERENCES users (id),
@@ -119,35 +119,35 @@ CREATE TABLE media (
  CONSTRAINT fk_media_media_types FOREIGN KEY (media_types_id) REFERENCES media_types (id)
 );
 
--- Создавал БД совместно с Вами на уроке, параллельно вникая в процесс
--- Всё достаточно понятно, просто нужно уметь различать типы данных для корректной записи, и понимать связи между таблицами
--- Относительно нормализации отношений всё также понятно, правда здесь в однострочных таблицах это не применишь
+-- РЎРѕР·РґР°РІР°Р» Р‘Р” СЃРѕРІРјРµСЃС‚РЅРѕ СЃ Р’Р°РјРё РЅР° СѓСЂРѕРєРµ, РїР°СЂР°Р»Р»РµР»СЊРЅРѕ РІРЅРёРєР°СЏ РІ РїСЂРѕС†РµСЃСЃ
+-- Р’СЃС‘ РґРѕСЃС‚Р°С‚РѕС‡РЅРѕ РїРѕРЅСЏС‚РЅРѕ, РїСЂРѕСЃС‚Рѕ РЅСѓР¶РЅРѕ СѓРјРµС‚СЊ СЂР°Р·Р»РёС‡Р°С‚СЊ С‚РёРїС‹ РґР°РЅРЅС‹С… РґР»СЏ РєРѕСЂСЂРµРєС‚РЅРѕР№ Р·Р°РїРёСЃРё, Рё РїРѕРЅРёРјР°С‚СЊ СЃРІСЏР·Рё РјРµР¶РґСѓ С‚Р°Р±Р»РёС†Р°РјРё
+-- РћС‚РЅРѕСЃРёС‚РµР»СЊРЅРѕ РЅРѕСЂРјР°Р»РёР·Р°С†РёРё РѕС‚РЅРѕС€РµРЅРёР№ РІСЃС‘ С‚Р°РєР¶Рµ РїРѕРЅСЏС‚РЅРѕ, РїСЂР°РІРґР° Р·РґРµСЃСЊ РІ РѕРґРЅРѕСЃС‚СЂРѕС‡РЅС‹С… С‚Р°Р±Р»РёС†Р°С… СЌС‚Рѕ РЅРµ РїСЂРёРјРµРЅРёС€СЊ
 
-/*Задание №2.
-	Дополним ранее созданную БД таблицами постов и ЧС */
+/*Р—Р°РґР°РЅРёРµ в„–2.
+	Р”РѕРїРѕР»РЅРёРј СЂР°РЅРµРµ СЃРѕР·РґР°РЅРЅСѓСЋ Р‘Р” С‚Р°Р±Р»РёС†Р°РјРё РїРѕСЃС‚РѕРІ Рё Р§РЎ */
 
--- Реализуем таблицу постов
+-- Р РµР°Р»РёР·СѓРµРј С‚Р°Р±Р»РёС†Сѓ РїРѕСЃС‚РѕРІ
 
 CREATE TABLE posts (
-	id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY, -- id поста
-	user_id BIGINT UNSIGNED NOT NULL, -- id автора поста
-	txt TEXT NOT NULL, -- текст поста, не может быть нулевым
-	attached_file VARCHAR(245) DEFAULT NULL COMMENT '/path/file.jpg', -- возможный вложенный файл,музыка,фото,видео
- 	attached_file_size bigint DEFAULT NULL, -- размер вложенного файла
-	created_at DATETIME DEFAULT CURRENT_TIMESTAMP, -- время создания поста
-	updated_at DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP, -- время обновления поста, меняется
-	INDEX user_posts_idx (user_id), -- индекс юзера, для просмотров постов
-	CONSTRAINT fk_user_posts FOREIGN KEY (user_id) REFERENCES users (id) -- связь 1:многим с таблицей users
+	id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY, -- id РїРѕСЃС‚Р°
+	user_id BIGINT UNSIGNED NOT NULL, -- id Р°РІС‚РѕСЂР° РїРѕСЃС‚Р°
+	txt TEXT NOT NULL, -- С‚РµРєСЃС‚ РїРѕСЃС‚Р°, РЅРµ РјРѕР¶РµС‚ Р±С‹С‚СЊ РЅСѓР»РµРІС‹Рј
+	attached_file VARCHAR(245) DEFAULT NULL COMMENT '/path/file.jpg', -- РІРѕР·РјРѕР¶РЅС‹Р№ РІР»РѕР¶РµРЅРЅС‹Р№ С„Р°Р№Р»,РјСѓР·С‹РєР°,С„РѕС‚Рѕ,РІРёРґРµРѕ
+ 	attached_file_size bigint DEFAULT NULL, -- СЂР°Р·РјРµСЂ РІР»РѕР¶РµРЅРЅРѕРіРѕ С„Р°Р№Р»Р°
+	created_at DATETIME DEFAULT CURRENT_TIMESTAMP, -- РІСЂРµРјСЏ СЃРѕР·РґР°РЅРёСЏ РїРѕСЃС‚Р°
+	updated_at DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP, -- РІСЂРµРјСЏ РѕР±РЅРѕРІР»РµРЅРёСЏ РїРѕСЃС‚Р°, РјРµРЅСЏРµС‚СЃСЏ
+	INDEX user_posts_idx (user_id), -- РёРЅРґРµРєСЃ СЋР·РµСЂР°, РґР»СЏ РїСЂРѕСЃРјРѕС‚СЂРѕРІ РїРѕСЃС‚РѕРІ
+	CONSTRAINT fk_user_posts FOREIGN KEY (user_id) REFERENCES users (id) -- СЃРІСЏР·СЊ 1:РјРЅРѕРіРёРј СЃ С‚Р°Р±Р»РёС†РµР№ users
 );
 
--- Реализуем таблицу чёрного списка
+-- Р РµР°Р»РёР·СѓРµРј С‚Р°Р±Р»РёС†Сѓ С‡С‘СЂРЅРѕРіРѕ СЃРїРёСЃРєР°
 
 CREATE TABLE black_list (
-	initiator_id BIGINT UNSIGNED NOT NULL, -- id инициатора блокировки
-	banned_id BIGINT UNSIGNED NOT NULL, -- id заблокированного пользователя
-	PRIMARY KEY (initiator_id, banned_id), -- ключ пары, для предотвращения повторной блокировки при её наличии
-	INDEX initiator_bl_idx (initiator_id), -- индекс инициатора, просмотр всех блокировок 
-	INDEX banned_bl_idx (banned_id), -- индекс заблокированного пользователя, просмотр всех кто заблокировал
-	CONSTRAINT fk_users_initiator_bl FOREIGN KEY (initiator_id) REFERENCES users (id), -- связь многиx:многим к таблице users
-	CONSTRAINT fk_users_banned_bl FOREIGN KEY (banned_id) REFERENCES users (id) -- связь многиx:многим к таблице users
+	initiator_id BIGINT UNSIGNED NOT NULL, -- id РёРЅРёС†РёР°С‚РѕСЂР° Р±Р»РѕРєРёСЂРѕРІРєРё
+	banned_id BIGINT UNSIGNED NOT NULL, -- id Р·Р°Р±Р»РѕРєРёСЂРѕРІР°РЅРЅРѕРіРѕ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ
+	PRIMARY KEY (initiator_id, banned_id), -- РєР»СЋС‡ РїР°СЂС‹, РґР»СЏ РїСЂРµРґРѕС‚РІСЂР°С‰РµРЅРёСЏ РїРѕРІС‚РѕСЂРЅРѕР№ Р±Р»РѕРєРёСЂРѕРІРєРё РїСЂРё РµС‘ РЅР°Р»РёС‡РёРё
+	INDEX initiator_bl_idx (initiator_id), -- РёРЅРґРµРєСЃ РёРЅРёС†РёР°С‚РѕСЂР°, РїСЂРѕСЃРјРѕС‚СЂ РІСЃРµС… Р±Р»РѕРєРёСЂРѕРІРѕРє 
+	INDEX banned_bl_idx (banned_id), -- РёРЅРґРµРєСЃ Р·Р°Р±Р»РѕРєРёСЂРѕРІР°РЅРЅРѕРіРѕ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ, РїСЂРѕСЃРјРѕС‚СЂ РІСЃРµС… РєС‚Рѕ Р·Р°Р±Р»РѕРєРёСЂРѕРІР°Р»
+	CONSTRAINT fk_users_initiator_bl FOREIGN KEY (initiator_id) REFERENCES users (id), -- СЃРІСЏР·СЊ РјРЅРѕРіРёx:РјРЅРѕРіРёРј Рє С‚Р°Р±Р»РёС†Рµ users
+	CONSTRAINT fk_users_banned_bl FOREIGN KEY (banned_id) REFERENCES users (id) -- СЃРІСЏР·СЊ РјРЅРѕРіРёx:РјРЅРѕРіРёРј Рє С‚Р°Р±Р»РёС†Рµ users
 );
