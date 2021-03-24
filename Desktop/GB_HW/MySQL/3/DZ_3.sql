@@ -1,7 +1,7 @@
 -- Практическое задание №3.
 
 /* Задание №1.
-	Проанализировать структуру БД vk, предложения по усовершенствованию */
+	Проанализировать созданную БД vk */
 DROP DATABASE IF EXISTS vk;
 
 CREATE DATABASE vk;
@@ -22,12 +22,25 @@ CREATE TABLE users (
  UNIQUE INDEX phone_unique (phone)
 ) ENGINE=InnoDB;
 
+ALTER TABLE users ADD COLUMN passport_number VARCHAR(10);
+
+ALTER TABLE users MODIFY COLUMN passport_number VARCHAR(20);
+
+ALTER TABLE users RENAME COLUMN passport_number TO passport;
+
+ALTER TABLE users ADD UNIQUE KEY passport_unique (passport);
+
+ALTER TABLE users DROP INDEX passport_unique;
+
+ALTER TABLE users DROP COLUMN passport;
+
 SELECT * FROM users;
 
 DESCRIBE users; -- описание таблицы
 
+
 CREATE TABLE profiles (
- user_id BIGINT UNSIGNED NOT NULL,
+ user_id bigint UNSIGNED NOT NULL,
  gender ENUM('f','m','x') NOT NULL,
  birthday DATE NOT NULL,
  photo_id INT UNSIGNED,
@@ -41,9 +54,9 @@ CREATE TABLE profiles (
 DESCRIBE profiles;
 
 CREATE TABLE messages (
- id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
- from_user_id BIGINT UNSIGNED NOT NULL,
- to_user_id BIGINT UNSIGNED NOT NULL,
+ id bigint UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+ from_user_id bigint UNSIGNED NOT NULL,
+ to_user_id bigint UNSIGNED NOT NULL,
  txt TEXT NOT NULL,
  is_delivered BOOLEAN DEFAULT FALSE,
  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -57,9 +70,9 @@ CREATE TABLE messages (
 DESCRIBE messages;
 
 CREATE TABLE friend_requests (
- id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
- from_user_id BIGINT UNSIGNED NOT NULL,
- to_user_id BIGINT UNSIGNED NOT NULL,
+ id bigint UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+ from_user_id bigint UNSIGNED NOT NULL,
+ to_user_id bigint UNSIGNED NOT NULL,
  accepted BOOLEAN DEFAULT FALSE,
  INDEX fk_friend_requests_from_user_idx (from_user_id),
  INDEX fk_friend_requests_to_user_idx (to_user_id),
@@ -69,18 +82,18 @@ CREATE TABLE friend_requests (
 
 
 CREATE TABLE communities (
- id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+ id bigint UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
  name VARCHAR(145) NOT NULL,
  description VARCHAR(245) DEFAULT NULL,
- admin_id BIGINT UNSIGNED NOT NULL,
+ admin_id bigint UNSIGNED NOT NULL,
  INDEX fk_communities_users_admin_idx (admin_id),
  CONSTRAINT fk_communities_users FOREIGN KEY (admin_id) REFERENCES users (id)
 );
 
 
 CREATE TABLE communities_users (
- community_id BIGINT UNSIGNED NOT NULL,
- user_id BIGINT UNSIGNED NOT NULL,
+ community_id bigint UNSIGNED NOT NULL,
+ user_id bigint UNSIGNED NOT NULL,
  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
  PRIMARY KEY (community_id, user_id),
  INDEX fk_communities_users_comm_idx (community_id),
@@ -91,52 +104,50 @@ CREATE TABLE communities_users (
 
 CREATE TABLE media_types (
  id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
- name VARCHAR(45) NOT NULL
+ name varchar(45) NOT NULL
 );
 
 CREATE TABLE media (
- id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
- user_id BIGINT UNSIGNED NOT NULL,
+ id bigint UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+ user_id bigint UNSIGNED NOT NULL,
  media_types_id INT UNSIGNED NOT NULL,
  file_name VARCHAR(245) DEFAULT NULL COMMENT '/files/folder/img.png',
- file_size BIGINT DEFAULT NULL,
+ file_size bigint DEFAULT NULL,
  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
  INDEX fk_media_media_types_idx (media_types_id),
  INDEX fk_media_users__idx (user_id),
  CONSTRAINT fk_media_media_types FOREIGN KEY (media_types_id) REFERENCES media_types (id)
 );
 
--- По созданию БД шёл вместе с Вами по уроку, совместно исправлял неполадки и реализовывал структуру
--- Вопросов нет, просто нужно последовательно оформлять таблицы, типы данных у переменных, индексы и внешние ключи
--- Про нормализацию отношений также сложно добавить что-то, тема понятная, 4 формы достаточно ясны, но в данном задании всё итак структурированно, поскольку у нас все таблицы однострочные
-
+-- Создавал БД совместно с Вами на уроке, параллельно вникая в процесс
+-- Всё достаточно понятно, просто нужно уметь различать типы данных для корректной записи, и понимать связи между таблицами
+-- Относительно нормализации отношений всё также понятно, правда здесь в однострочных таблицах это не применишь
 
 /*Задание №2.
-	Реализовать пару таблиц для созданной БД vk по аналогии с ранее созданными таблицами */
+	Дополним ранее созданную БД таблицами постов и ЧС */
 
--- Посты пользователя
+-- Реализуем таблицу постов
 
 CREATE TABLE posts (
- id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY, -- id поста, аналогичный тип данных
- user_id BIGINT UNSIGNED NOT NULL, -- id автора
- txt TEXT NOT NULL, -- тект поста, по аналогии с сообщениями (не нулевой)
- attached_file VARCHAR(245) DEFAULT NULL COMMENT '/path/file.jpg', -- приложенное фото,видео,музыка если есть (пока нулевая)
- file_size BIGINT DEFAULT NULL, -- размер приложенного файла
- created_at DATETIME DEFAULT CURRENT_TIMESTAMP, -- время создания 
- updated_at DATETIME DEFAULT ON UPDATE CURRENT_TIMESTAMP, -- время обновления (та же аналогия с сообщениями) 
- INDEX fk_user_posts_idx (user_id), -- индекс для поиска постов
- CONSTRAINT fk_user_posts FOREIGN KEY (user_id) REFERENCES users (id) -- связь 1:многим с таблицей users
+	id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY, -- id поста
+	user_id BIGINT UNSIGNED NOT NULL, -- id автора поста
+	txt TEXT NOT NULL, -- текст поста, не может быть нулевым
+	attached_file VARCHAR(245) DEFAULT NULL COMMENT '/path/file.jpg', -- возможный вложенный файл,музыка,фото,видео
+ 	attached_file_size bigint DEFAULT NULL, -- размер вложенного файла
+	created_at DATETIME DEFAULT CURRENT_TIMESTAMP, -- время создания поста
+	updated_at DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP, -- время обновления поста, меняется
+	INDEX user_posts_idx (user_id), -- индекс юзера, для просмотров постов
+	CONSTRAINT fk_user_posts FOREIGN KEY (user_id) REFERENCES users (id) -- связь 1:многим с таблицей users
 );
 
--- Чёрный список
+-- Реализуем таблицу чёрного списка
 
 CREATE TABLE black_list (
- originator_id BIGINT UNSIGNED NOT NULL, -- id инициатора добавления в ЧС
- banned_id BIGINT UNSIGNED NOT NULL, -- id, добавленного в ЧС
- PRIMARY KEY (originator_id, banned_id), -- ключ для одноразового банна, исключающий ошибку
- INDEX fk_originator_idx (originator_id), -- индекс инициатора, для просмотра баннов пользователя
- INDEX fk_banned_idx (banned_id), -- индекс добавленного в ЧС, для просмотра кто его забанил
- CONSTRAINT fk_users_originator FOREIGN KEY (originator_id) REFERENCES users (id), -- связь от многих:многим с таблицей users
- CONSTRAINT fk_users_banned FOREIGN KEY (banned_id) REFERENCES users (id) -- связь от многих:многим с таблицей users
+	initiator_id BIGINT UNSIGNED NOT NULL, -- id инициатора блокировки
+	banned_id BIGINT UNSIGNED NOT NULL, -- id заблокированного пользователя
+	PRIMARY KEY (initiator_id, banned_id), -- ключ пары, для предотвращения повторной блокировки при её наличии
+	INDEX initiator_bl_idx (initiator_id), -- индекс инициатора, просмотр всех блокировок 
+	INDEX banned_bl_idx (banned_id), -- индекс заблокированного пользователя, просмотр всех кто заблокировал
+	CONSTRAINT fk_users_initiator_bl FOREIGN KEY (initiator_id) REFERENCES users (id), -- связь многиx:многим к таблице users
+	CONSTRAINT fk_users_banned_bl FOREIGN KEY (banned_id) REFERENCES users (id) -- связь многиx:многим к таблице users
 );
-
