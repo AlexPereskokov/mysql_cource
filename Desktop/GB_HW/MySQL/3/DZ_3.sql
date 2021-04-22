@@ -140,6 +140,14 @@ CREATE TABLE posts (
 	CONSTRAINT fk_user_posts FOREIGN KEY (user_id) REFERENCES users (id) -- связь 1:многим с таблицей users
 );
 
+SHOW CREATE TABLE posts; -- для проверки содержимого редактируемой таблицы
+
+ALTER TABLE posts DROP COLUMN attached_file; -- удаление столбца
+ALTER TABLE posts DROP COLUMN attached_file_size; -- удаление столбца
+ALTER TABLE posts ADD COLUMN media_id bigint UNSIGNED NOT NULL; -- добавление столбца, важно, чтобы соблюдался тип данных переменной и связующего звена другой таблицы
+ALTER TABLE posts
+ADD CONSTRAINT fk_posts_media
+FOREIGN KEY (media_id) REFERENCES media(id); -- создаём связь с таблицей media
 -- Реализуем таблицу чёрного списка
 
 CREATE TABLE black_list (

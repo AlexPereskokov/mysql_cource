@@ -29,6 +29,7 @@ SHOW CREATE TABLE media_types;
 
 ALTER TABLE media_types MODIFY COLUMN name VARCHAR(45) NOT NULL UNIQUE;
 
+USE vk2;
 
 /*Задание №2.
 	Используя сервис http://filldb.info сгенерировать тестовые данные для всех таблиц, используя vk-dump-skelet.sql, учитывая логику связей */

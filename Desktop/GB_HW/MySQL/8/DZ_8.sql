@@ -348,16 +348,19 @@ DROP FUNCTION IF EXISTS hello;
 delimiter //  -- для понимания конца функции
 
 CREATE FUNCTION hello()
+RETURNS TINYTEXT DETERMINISTIC
 BEGIN
+	DECLARE time_now INT;
+	SET time_now = HOUR(NOW());
 	CASE 
-		WHEN CURTIME() BETWEEN '06:00:00' AND '11:59:59' THEN
-			SELECT 'Доброе утро';
-		WHEN CURTIME() BETWEEN '12:00:00' AND '17:59:59' THEN
-			SELECT 'Добрый день';
-		WHEN CURTIME() BETWEEN '18:00:00' AND '23:59:59' THEN
-			SELECT 'Добрый вечер';
-		ELSE
-			SELECT 'Доброй ночи';
+		WHEN time_now BETWEEN 6 AND 11 THEN
+			RETURN "Доброе утро";
+		WHEN time_now BETWEEN 12 AND 17 THEN
+			RETURN "Добрый день";
+		WHEN time_now BETWEEN 18 AND 23 THEN
+			RETURN "Добрый вечер";
+		WHEN time_now BETWEEN 0 AND 5 THEN
+			RETURN "Доброй ночи";
 	END CASE;
 END //
 
